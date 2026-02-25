@@ -128,8 +128,9 @@ ERROR INITRD CDROM NO ENCONTRADO
 Si aparece:
 
    cp: cannot stat '.../images/cdrom/initrd.gz'
+   cp: cannot stat '.../images/cdrom/vmlinuz'
 
-Ahora el script intenta recuperarlo automáticamente (mirror-only -> parche initrd -> build-only).
+Ahora el script intenta recuperarlos automáticamente (mirror-only -> parche initrd/vmlinuz -> build-only).
 Solo vuelve a lanzar:
 
    ./build-iso.sh

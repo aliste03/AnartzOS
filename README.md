@@ -191,8 +191,8 @@ Algunos mirrors/distros no exponen `images/cdrom/initrd.gz` directamente para `s
 1. `--mirror-only`
 2. `--build-only`
 
-Entre ambas, si falta `.../images/cdrom/initrd.gz`, intenta recuperarlo desde:
+Entre ambas, si faltan `.../images/cdrom/initrd.gz` o `.../images/cdrom/vmlinuz`, intenta recuperarlos desde:
 - netboot local ya espejado, o
 - descarga directa desde rutas `netboot/` o `hd-media/` del mirror,
 
-y lo coloca en la ruta esperada por `debian-cd`.
+y los coloca en las rutas esperadas por `debian-cd`.

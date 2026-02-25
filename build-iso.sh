@@ -50,48 +50,62 @@ echo "[INFO] Paso 1/2: mirror-only para Anartz OS con dist=${ACTIVE_DIST}..."
 printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --mirror-only; printf '\n'
 sudo "${BASE_CMD[@]}" --mirror-only
 
-EXPECTED_INITRD="tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom/initrd.gz"
-if [ ! -f "${EXPECTED_INITRD}" ]; then
-  echo "[WARN] Falta initrd cdrom esperado: ${EXPECTED_INITRD}"
-  mkdir -p "$(dirname "${EXPECTED_INITRD}")"
+EXPECTED_DIR="tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom"
+EXPECTED_INITRD="${EXPECTED_DIR}/initrd.gz"
+EXPECTED_KERNEL="${EXPECTED_DIR}/vmlinuz"
 
-  CANDIDATES=(
-    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/initrd.gz"
-    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/initrd.gz"
-    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/initrd.gz"
+recover_file() {
+  local target_path="$1"
+  local filename="$2"
+  local recovered=0
+
+  if [ -f "${target_path}" ]; then
+    return 0
+  fi
+
+  echo "[WARN] Falta ${filename} esperado: ${target_path}"
+  mkdir -p "$(dirname "${target_path}")"
+
+  local local_candidates=(
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/${filename}"
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/${filename}"
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/${filename}"
   )
 
-  RECOVERED=0
-  for local_candidate in "${CANDIDATES[@]}"; do
+  for local_candidate in "${local_candidates[@]}"; do
     if [ -f "${local_candidate}" ]; then
-      cp -f "${local_candidate}" "${EXPECTED_INITRD}"
-      echo "[INFO] Initrd recuperado desde mirror local: ${local_candidate}"
-      RECOVERED=1
+      cp -f "${local_candidate}" "${target_path}"
+      echo "[INFO] ${filename} recuperado desde mirror local: ${local_candidate}"
+      recovered=1
       break
     fi
   done
 
-  if [ "${RECOVERED}" -eq 0 ]; then
-    URL_CANDIDATES=(
-      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/initrd.gz"
-      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/initrd.gz"
-      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/initrd.gz"
+  if [ "${recovered}" -eq 0 ]; then
+    local remote_candidates=(
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/${filename}"
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/${filename}"
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/${filename}"
     )
-    for remote_url in "${URL_CANDIDATES[@]}"; do
-      if curl -fsSL "${remote_url}" -o "${EXPECTED_INITRD}"; then
-        echo "[INFO] Initrd recuperado descargando: ${remote_url}"
-        RECOVERED=1
+    for remote_url in "${remote_candidates[@]}"; do
+      if curl -fsSL "${remote_url}" -o "${target_path}"; then
+        echo "[INFO] ${filename} recuperado descargando: ${remote_url}"
+        recovered=1
         break
       fi
     done
   fi
 
-  if [ "${RECOVERED}" -eq 0 ]; then
-    echo "[ERROR] No pude recuperar initrd para ${ACTIVE_DIST}."
-    echo "[ERROR] Revisa tmp/log/ y prueba cambiar ANARTZ_DIST en auto/config."
-    exit 1
+  if [ "${recovered}" -eq 0 ]; then
+    echo "[ERROR] No pude recuperar ${filename} para ${ACTIVE_DIST}."
+    return 1
   fi
-fi
+
+  return 0
+}
+
+recover_file "${EXPECTED_INITRD}" "initrd.gz"
+recover_file "${EXPECTED_KERNEL}" "vmlinuz"
 
 echo "[INFO] Paso 2/2: build-only para generar ISO instalable de Anartz OS..."
 printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --build-only; printf '\n'
