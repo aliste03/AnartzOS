@@ -96,3 +96,29 @@ Luego repite:
 ```bash
 ./build-iso.sh
 ```
+
+
+## Si sigue saliendo `ambiguous option: --mirror`
+
+Eso significa que estás ejecutando una copia vieja del script o un comando distinto.
+
+Comprueba rápidamente:
+
+```bash
+pwd
+head -n 40 ./build-iso.sh
+```
+
+Debe verse `--debian-mirror` y **no** `--mirror`.
+
+También puedes verificar:
+
+```bash
+grep -n -- "--mirror" ./build-iso.sh || echo "OK: sin --mirror"
+```
+
+Luego ejecuta:
+
+```bash
+./build-iso.sh
+```

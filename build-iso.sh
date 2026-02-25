@@ -8,22 +8,40 @@ fi
 
 source ./auto/config
 
+# Guardrail: evita ejecutar una copia antigua del script con --mirror
+if grep -q -- '--mirror' "$0"; then
+  echo "[ERROR] Detectado '--mirror' en este script. Actualiza el repositorio y usa la versión nueva."
+  exit 1
+fi
+
 echo "[INFO] Limpiando builds previas de simple-cdd..."
 rm -rf simple-cdd/tmp simple-cdd/images simple-cdd/log images 2>/dev/null || true
 
-echo "[INFO] Construyendo ISO instalable (NO live) de Anartz OS..."
-sudo build-simple-cdd \
-  --conf simple-cdd.conf \
-  --profiles "${ANARTZ_PROFILES}" \
-  --dist "${ANARTZ_DIST}" \
-  --locale es_ES.UTF-8 \
-  --keyboard es \
-  --debian-mirror "${ANARTZ_DEBIAN_MIRROR}" \
-  --security-mirror "${ANARTZ_SECURITY_MIRROR}" \
-  --auto-profiles "${ANARTZ_PROFILES}" \
+CMD=(
+  build-simple-cdd
+  --conf simple-cdd.conf
+  --profiles "${ANARTZ_PROFILES}"
+  --dist "${ANARTZ_DIST}"
+  --locale es_ES.UTF-8
+  --keyboard es
+  --auto-profiles "${ANARTZ_PROFILES}"
   --force-root
+)
 
-ISO_PATH="$(find . -maxdepth 3 -type f -name '*.iso' | head -n1 || true)"
+# Compatibilidad entre versiones: solo añade mirrors si están definidos.
+if [ -n "${ANARTZ_DEBIAN_MIRROR:-}" ]; then
+  CMD+=(--debian-mirror "${ANARTZ_DEBIAN_MIRROR}")
+fi
+if [ -n "${ANARTZ_SECURITY_MIRROR:-}" ]; then
+  CMD+=(--security-mirror "${ANARTZ_SECURITY_MIRROR}")
+fi
+
+echo "[INFO] Construyendo ISO instalable (NO live) de Anartz OS..."
+printf '[INFO] Comando: sudo'; printf ' %q' "${CMD[@]}"; printf '\n'
+
+sudo "${CMD[@]}"
+
+ISO_PATH="$(find . -maxdepth 4 -type f -name '*.iso' | head -n1 || true)"
 if [ -n "${ISO_PATH}" ]; then
   cp -f "${ISO_PATH}" "${ANARTZ_ISO_NAME}"
   echo "[OK] ISO instalable generada: ${ANARTZ_ISO_NAME}"

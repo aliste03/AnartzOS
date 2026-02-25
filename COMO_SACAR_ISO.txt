@@ -62,3 +62,15 @@ ya está corregido en este repo cambiando a `--debian-mirror`.
 Simplemente vuelve a ejecutar:
 
    ./build-iso.sh
+
+
+COMPROBACION RAPIDA SI EL ERROR CONTINUA
+========================================
+
+Ejecuta:
+
+   pwd
+   head -n 40 ./build-iso.sh
+   grep -n -- "--mirror" ./build-iso.sh || echo "OK: sin --mirror"
+
+Si sale `--mirror`, estás usando una copia antigua del script.
