@@ -3,8 +3,8 @@ set -euo pipefail
 
 export ANARTZ_DIST="bookworm"
 export ANARTZ_ARCH="amd64"
-export ANARTZ_DEBIAN_MIRROR="http://deb.debian.org/debian"
-export ANARTZ_SECURITY_MIRROR="http://security.debian.org/debian-security"
+export ANARTZ_DEBIAN_MIRROR="https://deb.debian.org/debian/"
+export ANARTZ_SECURITY_MIRROR="https://security.debian.org/debian-security/"
 export ANARTZ_PROFILES="anartz"
 export ANARTZ_ISO_NAME="anartz-os-installable.iso"
 

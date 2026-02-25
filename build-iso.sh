@@ -14,6 +14,15 @@ if grep -q -- '--mirror' "$0"; then
   exit 1
 fi
 
+echo "[INFO] Comprobando mirrors de Debian..."
+
+# Sanity check rápido de mirrors (evita fallos tipo "No packages found")
+for u in "${ANARTZ_DEBIAN_MIRROR}dists/${ANARTZ_DIST}/Release" "${ANARTZ_SECURITY_MIRROR}dists/${ANARTZ_DIST}-security/Release"; do
+  if ! curl -fsSLI "$u" >/dev/null 2>&1; then
+    echo "[WARN] No pude validar mirror: $u"
+  fi
+done
+
 echo "[INFO] Limpiando builds previas de simple-cdd..."
 rm -rf simple-cdd/tmp simple-cdd/images simple-cdd/log images 2>/dev/null || true
 
@@ -25,6 +34,7 @@ CMD=(
   --locale es_ES.UTF-8
   --keyboard es
   --auto-profiles "${ANARTZ_PROFILES}"
+  --profiles-udeb-dist "${ANARTZ_DIST}"
   --force-root
 )
 

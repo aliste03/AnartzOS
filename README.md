@@ -122,3 +122,23 @@ Luego ejecuta:
 ```bash
 ./build-iso.sh
 ```
+
+
+## Error: `No packages found` / `debian_mirror ... does not end in '/'`
+
+Se corrigió la configuración para usar mirrors con **HTTPS** y barra final (`/`):
+
+- `https://deb.debian.org/debian/`
+- `https://security.debian.org/debian-security/`
+
+Además `build-iso.sh` ahora:
+- valida mirrors al inicio;
+- fija `--profiles-udeb-dist bookworm`;
+- imprime el comando exacto antes de ejecutar.
+
+Si te vuelve a pasar, limpia y relanza:
+
+```bash
+rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log
+./build-iso.sh
+```
