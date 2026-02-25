@@ -142,3 +142,19 @@ Si te vuelve a pasar, limpia y relanza:
 rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log
 ./build-iso.sh
 ```
+
+
+## Compatibilidad simple-cdd en Kali (fallback automático)
+
+En algunos Kali/simple-cdd, `bookworm` falla con:
+
+- `E: No packages found`
+- `... installer-amd64 ... initrd.gz: No such file or directory`
+
+Para evitarlo, `build-iso.sh` ahora verifica si existe `installer-amd64/current/images/cdrom/initrd.gz` para la distro activa y, si no existe, aplica **fallback automático a bullseye**.
+
+Puedes forzarlo manualmente editando `auto/config`:
+
+```bash
+export ANARTZ_DIST="bullseye"
+```

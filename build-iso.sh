@@ -8,39 +8,65 @@ fi
 
 source ./auto/config
 
-echo "[INFO] Comprobando mirrors de Debian..."
+ACTIVE_DIST="${ANARTZ_DIST}"
+ACTIVE_SECURITY_MIRROR="${ANARTZ_SECURITY_MIRROR}"
 
-# Sanity check rápido de mirrors (evita fallos tipo "No packages found")
-for u in "${ANARTZ_DEBIAN_MIRROR}dists/${ANARTZ_DIST}/Release" "${ANARTZ_SECURITY_MIRROR}dists/${ANARTZ_DIST}-security/Release"; do
-  if ! curl -fsSLI "$u" >/dev/null 2>&1; then
-    echo "[WARN] No pude validar mirror: $u"
+installer_initrd_url() {
+  local dist="$1"
+  printf '%sdists/%s/main/installer-%s/current/images/cdrom/initrd.gz' \
+    "${ANARTZ_DEBIAN_MIRROR}" "${dist}" "${ANARTZ_ARCH}"
+}
+
+release_url() {
+  local dist="$1"
+  printf '%sdists/%s/Release' "${ANARTZ_DEBIAN_MIRROR}" "${dist}"
+}
+
+security_release_url() {
+  local dist="$1"
+  printf '%sdists/%s-security/Release' "${ANARTZ_SECURITY_MIRROR}" "${dist}"
+}
+
+echo "[INFO] Comprobando mirrors de Debian para ${ACTIVE_DIST}..."
+
+if ! curl -fsSLI "$(release_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
+  echo "[WARN] Mirror principal no responde para ${ACTIVE_DIST}: $(release_url "${ACTIVE_DIST}")"
+fi
+if ! curl -fsSLI "$(installer_initrd_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
+  echo "[WARN] No existe initrd cdrom para ${ACTIVE_DIST} en el mirror configurado."
+  if [ -n "${ANARTZ_FALLBACK_DIST:-}" ]; then
+    echo "[INFO] Aplicando fallback de compatibilidad simple-cdd -> ${ANARTZ_FALLBACK_DIST}"
+    ACTIVE_DIST="${ANARTZ_FALLBACK_DIST}"
+    ACTIVE_SECURITY_MIRROR="${ANARTZ_FALLBACK_SECURITY_MIRROR:-${ANARTZ_SECURITY_MIRROR}}"
   fi
-done
+fi
+if ! curl -fsSLI "$(security_release_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
+  echo "[WARN] Mirror de seguridad no responde para ${ACTIVE_DIST}: $(security_release_url "${ACTIVE_DIST}")"
+fi
 
 echo "[INFO] Limpiando builds previas de simple-cdd..."
-rm -rf simple-cdd/tmp simple-cdd/images simple-cdd/log images 2>/dev/null || true
+rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log 2>/dev/null || true
 
 CMD=(
   build-simple-cdd
   --conf simple-cdd.conf
   --profiles "${ANARTZ_PROFILES}"
-  --dist "${ANARTZ_DIST}"
+  --dist "${ACTIVE_DIST}"
   --locale es_ES.UTF-8
   --keyboard es
   --auto-profiles "${ANARTZ_PROFILES}"
-  --profiles-udeb-dist "${ANARTZ_DIST}"
+  --profiles-udeb-dist "${ACTIVE_DIST}"
   --force-root
 )
 
-# Compatibilidad entre versiones: solo añade mirrors si están definidos.
 if [ -n "${ANARTZ_DEBIAN_MIRROR:-}" ]; then
   CMD+=(--debian-mirror "${ANARTZ_DEBIAN_MIRROR}")
 fi
-if [ -n "${ANARTZ_SECURITY_MIRROR:-}" ]; then
-  CMD+=(--security-mirror "${ANARTZ_SECURITY_MIRROR}")
+if [ -n "${ACTIVE_SECURITY_MIRROR:-}" ]; then
+  CMD+=(--security-mirror "${ACTIVE_SECURITY_MIRROR}")
 fi
 
-echo "[INFO] Construyendo ISO instalable (NO live) de Anartz OS..."
+echo "[INFO] Construyendo ISO instalable (NO live) de Anartz OS con dist=${ACTIVE_DIST}..."
 printf '[INFO] Comando: sudo'; printf ' %q' "${CMD[@]}"; printf '\n'
 
 sudo "${CMD[@]}"
@@ -50,5 +76,5 @@ if [ -n "${ISO_PATH}" ]; then
   cp -f "${ISO_PATH}" "${ANARTZ_ISO_NAME}"
   echo "[OK] ISO instalable generada: ${ANARTZ_ISO_NAME}"
 else
-  echo "[WARN] No encontré ninguna ISO tras la build; revisa logs de simple-cdd."
+  echo "[WARN] No encontré ninguna ISO tras la build; revisa logs en ./tmp/log/."
 fi

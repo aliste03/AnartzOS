@@ -85,3 +85,22 @@ Si falla de nuevo:
 
    rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log
    ./build-iso.sh
+
+
+FALLO NO PACKAGES FOUND EN KALI
+===============================
+
+Si aparece:
+
+   E: No packages found
+   ... installer-amd64 ... initrd.gz ... No such file or directory
+
+El script ya intenta fallback automático a bullseye.
+Si quieres forzarlo tú:
+
+   nano auto/config
+   # cambiar a: export ANARTZ_DIST="bullseye"
+
+Y relanza:
+
+   ./build-iso.sh
