@@ -8,12 +8,6 @@ fi
 
 source ./auto/config
 
-# Guardrail: evita ejecutar una copia antigua del script con --mirror
-if grep -q -- '--mirror' "$0"; then
-  echo "[ERROR] Detectado '--mirror' en este script. Actualiza el repositorio y usa la versión nueva."
-  exit 1
-fi
-
 echo "[INFO] Comprobando mirrors de Debian..."
 
 # Sanity check rápido de mirrors (evita fallos tipo "No packages found")
