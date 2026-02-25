@@ -161,3 +161,15 @@ Puedes forzarlo manualmente editando `auto/config`:
 export ANARTZ_DIST="bullseye"
 export ANARTZ_FALLBACK_DIST="bookworm"
 ```
+
+
+## Error `reprepro ... undefinedtarget` en Kali
+
+Si aparece ese error al usar `bullseye`, normalmente es por componentes no válidos para esa release.
+
+- `bullseye` **no** usa `non-free-firmware`.
+- El script ahora ajusta componentes automáticamente:
+  - `bullseye` -> `main contrib non-free`
+  - `bookworm+` -> `main contrib non-free non-free-firmware`
+
+Además genera una conf temporal `.simple-cdd.active.conf` con los componentes correctos para la distro activa.
