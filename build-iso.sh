@@ -57,6 +57,7 @@ EXPECTED_KERNEL="${EXPECTED_DIR}/vmlinuz"
 recover_file() {
   local target_path="$1"
   local filename="$2"
+  local allow_stub="${3:-0}"
   local recovered=0
 
   if [ -f "${target_path}" ]; then
@@ -67,6 +68,7 @@ recover_file() {
   mkdir -p "$(dirname "${target_path}")"
 
   local local_candidates=(
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom/${filename}"
     "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/${filename}"
     "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/${filename}"
     "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/${filename}"
@@ -83,6 +85,7 @@ recover_file() {
 
   if [ "${recovered}" -eq 0 ]; then
     local remote_candidates=(
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom/${filename}"
       "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/${filename}"
       "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/${filename}"
       "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/${filename}"
@@ -96,6 +99,15 @@ recover_file() {
     done
   fi
 
+  if [ "${recovered}" -eq 0 ] && [ "${allow_stub}" = "1" ] && [ "${filename}" = "debian-cd_info.tar.gz" ]; then
+    echo "[WARN] No encontré ${filename} en mirror; generando tarball mínimo de compatibilidad."
+    local tmpd
+    tmpd="$(mktemp -d)"
+    tar -C "${tmpd}" -czf "${target_path}" .
+    rm -rf "${tmpd}"
+    recovered=1
+  fi
+
   if [ "${recovered}" -eq 0 ]; then
     echo "[ERROR] No pude recuperar ${filename} para ${ACTIVE_DIST}."
     return 1
@@ -106,6 +118,7 @@ recover_file() {
 
 recover_file "${EXPECTED_INITRD}" "initrd.gz"
 recover_file "${EXPECTED_KERNEL}" "vmlinuz"
+recover_file "${EXPECTED_DIR}/debian-cd_info.tar.gz" "debian-cd_info.tar.gz" "1"
 
 echo "[INFO] Paso 2/2: build-only para generar ISO instalable de Anartz OS..."
 printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --build-only; printf '\n'

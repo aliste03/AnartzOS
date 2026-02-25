@@ -129,8 +129,9 @@ Si aparece:
 
    cp: cannot stat '.../images/cdrom/initrd.gz'
    cp: cannot stat '.../images/cdrom/vmlinuz'
+   cp: cannot stat '.../images/cdrom/debian-cd_info.tar.gz'
 
-Ahora el script intenta recuperarlos automáticamente (mirror-only -> parche initrd/vmlinuz -> build-only).
+Ahora el script intenta recuperarlos automáticamente (mirror-only -> parche initrd/vmlinuz/debian-cd_info -> build-only).
 Solo vuelve a lanzar:
 
    ./build-iso.sh
