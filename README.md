@@ -198,3 +198,12 @@ Entre ambas, si faltan `.../images/cdrom/initrd.gz`, `.../images/cdrom/vmlinuz` 
 y los coloca en las rutas esperadas por `debian-cd`.
 
 Si `debian-cd_info.tar.gz` no existe en ninguna ruta del mirror, genera un tarball mínimo de compatibilidad para no bloquear el proceso.
+
+
+## Error `NONFREE_COMPONENTS` no inicializada / falta `cdrom/gtk/vmlinuz`
+
+En algunos entornos, `debian-cd` requiere `NONFREE_COMPONENTS` y también ficheros en `images/cdrom/gtk/`.
+
+El script ahora:
+- ejecuta `build-simple-cdd` con `NONFREE_COMPONENTS` acorde a la distro activa;
+- recupera también `images/cdrom/gtk/initrd.gz` y `images/cdrom/gtk/vmlinuz` en la fase de parcheo.

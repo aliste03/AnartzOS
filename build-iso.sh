@@ -11,10 +11,12 @@ source ./auto/config
 ACTIVE_DIST="${ANARTZ_DIST}"
 ACTIVE_SECURITY_MIRROR="${ANARTZ_SECURITY_MIRROR}"
 ACTIVE_COMPONENTS="main contrib non-free non-free-firmware"
+ACTIVE_NONFREE_COMPONENTS="non-free non-free-firmware"
 
 # non-free-firmware existe a partir de bookworm. En bullseye rompe reprepro con undefinedtarget.
 if [[ "${ACTIVE_DIST}" == "bullseye"* ]]; then
   ACTIVE_COMPONENTS="main contrib non-free"
+  ACTIVE_NONFREE_COMPONENTS="non-free"
 fi
 
 echo "[INFO] Limpiando builds previas de simple-cdd..."
@@ -46,13 +48,22 @@ if [ -n "${ACTIVE_SECURITY_MIRROR:-}" ]; then
   BASE_CMD+=(--security-mirror "${ACTIVE_SECURITY_MIRROR}")
 fi
 
+run_simple_cdd() {
+  local mode="$1"
+  echo "[INFO] Comando: sudo env NONFREE_COMPONENTS=${ACTIVE_NONFREE_COMPONENTS}"
+  printf '[INFO] build-simple-cdd'; printf ' %q' "${BASE_CMD[@]:1}" "${mode}"; printf '\\n'
+  sudo env NONFREE_COMPONENTS="${ACTIVE_NONFREE_COMPONENTS}" "${BASE_CMD[@]}" "${mode}"
+}
+
 echo "[INFO] Paso 1/2: mirror-only para Anartz OS con dist=${ACTIVE_DIST}..."
-printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --mirror-only; printf '\n'
-sudo "${BASE_CMD[@]}" --mirror-only
+run_simple_cdd --mirror-only
 
 EXPECTED_DIR="tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom"
 EXPECTED_INITRD="${EXPECTED_DIR}/initrd.gz"
 EXPECTED_KERNEL="${EXPECTED_DIR}/vmlinuz"
+EXPECTED_GTK_DIR="${EXPECTED_DIR}/gtk"
+EXPECTED_GTK_INITRD="${EXPECTED_GTK_DIR}/initrd.gz"
+EXPECTED_GTK_KERNEL="${EXPECTED_GTK_DIR}/vmlinuz"
 
 recover_file() {
   local target_path="$1"
@@ -118,11 +129,12 @@ recover_file() {
 
 recover_file "${EXPECTED_INITRD}" "initrd.gz"
 recover_file "${EXPECTED_KERNEL}" "vmlinuz"
+recover_file "${EXPECTED_GTK_INITRD}" "initrd.gz"
+recover_file "${EXPECTED_GTK_KERNEL}" "vmlinuz"
 recover_file "${EXPECTED_DIR}/debian-cd_info.tar.gz" "debian-cd_info.tar.gz" "1"
 
 echo "[INFO] Paso 2/2: build-only para generar ISO instalable de Anartz OS..."
-printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --build-only; printf '\n'
-sudo "${BASE_CMD[@]}" --build-only
+run_simple_cdd --build-only
 
 ISO_PATH="$(find . -maxdepth 4 -type f -name '*.iso' | head -n1 || true)"
 if [ -n "${ISO_PATH}" ]; then

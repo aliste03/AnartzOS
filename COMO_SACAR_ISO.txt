@@ -135,3 +135,15 @@ Ahora el script intenta recuperarlos automáticamente (mirror-only -> parche ini
 Solo vuelve a lanzar:
 
    ./build-iso.sh
+
+
+ERROR GTK VMLINUZ / NONFREE_COMPONENTS
+======================================
+
+Si aparece error por `NONFREE_COMPONENTS` no inicializada o por falta de:
+
+   .../images/cdrom/gtk/vmlinuz
+
+esta versión ya lo corrige automáticamente al relanzar:
+
+   sudo ./build-iso.sh
