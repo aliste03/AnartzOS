@@ -114,3 +114,9 @@ ERROR REPREPRO UNDEFINEDTARGET
 Si sale error de `undefinedtarget`, era por componentes incompatibles (ej. `non-free-firmware` en bullseye).
 
 Ya está corregido: `build-iso.sh` ajusta componentes según distro y crea `.simple-cdd.active.conf` automáticamente.
+
+
+Si sigue fallando, limpia como root (muy importante):
+
+   sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf
+   ./build-iso.sh

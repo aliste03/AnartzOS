@@ -173,3 +173,11 @@ Si aparece ese error al usar `bullseye`, normalmente es por componentes no váli
   - `bookworm+` -> `main contrib non-free non-free-firmware`
 
 Además genera una conf temporal `.simple-cdd.active.conf` con los componentes correctos para la distro activa.
+
+
+Si el error persiste, fuerza limpieza de artefactos root antes de relanzar:
+
+```bash
+sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf
+./build-iso.sh
+```

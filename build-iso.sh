@@ -56,6 +56,8 @@ if ! curl -fsSLI "$(security_release_url "${ACTIVE_DIST}")" >/dev/null 2>&1; the
 fi
 
 echo "[INFO] Limpiando builds previas de simple-cdd..."
+# Nota: tras builds con sudo, tmp/ y mirror quedan con owner root; limpiar sin sudo deja basura (db/conf de reprepro) y rompe futuras builds.
+sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf 2>/dev/null || true
 rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf 2>/dev/null || true
 
 cp simple-cdd.conf .simple-cdd.active.conf
