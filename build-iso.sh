@@ -12,51 +12,13 @@ ACTIVE_DIST="${ANARTZ_DIST}"
 ACTIVE_SECURITY_MIRROR="${ANARTZ_SECURITY_MIRROR}"
 ACTIVE_COMPONENTS="main contrib non-free non-free-firmware"
 
-installer_initrd_url() {
-  local dist="$1"
-  printf '%sdists/%s/main/installer-%s/current/images/cdrom/initrd.gz' \
-    "${ANARTZ_DEBIAN_MIRROR}" "${dist}" "${ANARTZ_ARCH}"
-}
-
-release_url() {
-  local dist="$1"
-  printf '%sdists/%s/Release' "${ANARTZ_DEBIAN_MIRROR}" "${dist}"
-}
-
-security_release_url() {
-  local dist="$1"
-  printf '%sdists/%s-security/Release' "${ANARTZ_SECURITY_MIRROR}" "${dist}"
-}
-
 # non-free-firmware existe a partir de bookworm. En bullseye rompe reprepro con undefinedtarget.
 if [[ "${ACTIVE_DIST}" == "bullseye"* ]]; then
   ACTIVE_COMPONENTS="main contrib non-free"
 fi
 
-echo "[INFO] Comprobando mirrors de Debian para ${ACTIVE_DIST}..."
-
-if ! curl -fsSLI "$(release_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
-  echo "[WARN] Mirror principal no responde para ${ACTIVE_DIST}: $(release_url "${ACTIVE_DIST}")"
-fi
-if ! curl -fsSLI "$(installer_initrd_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
-  echo "[WARN] No existe initrd cdrom para ${ACTIVE_DIST} en el mirror configurado."
-  if [ -n "${ANARTZ_FALLBACK_DIST:-}" ]; then
-    echo "[INFO] Aplicando fallback de compatibilidad simple-cdd -> ${ANARTZ_FALLBACK_DIST}"
-    ACTIVE_DIST="${ANARTZ_FALLBACK_DIST}"
-    ACTIVE_SECURITY_MIRROR="${ANARTZ_FALLBACK_SECURITY_MIRROR:-${ANARTZ_SECURITY_MIRROR}}"
-    if [[ "${ACTIVE_DIST}" == "bullseye"* ]]; then
-      ACTIVE_COMPONENTS="main contrib non-free"
-    else
-      ACTIVE_COMPONENTS="main contrib non-free non-free-firmware"
-    fi
-  fi
-fi
-if ! curl -fsSLI "$(security_release_url "${ACTIVE_DIST}")" >/dev/null 2>&1; then
-  echo "[WARN] Mirror de seguridad no responde para ${ACTIVE_DIST}: $(security_release_url "${ACTIVE_DIST}")"
-fi
-
 echo "[INFO] Limpiando builds previas de simple-cdd..."
-# Nota: tras builds con sudo, tmp/ y mirror quedan con owner root; limpiar sin sudo deja basura (db/conf de reprepro) y rompe futuras builds.
+# tras builds con sudo, tmp/ y mirror quedan con owner root; limpiar sin sudo deja basura de reprepro.
 sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf 2>/dev/null || true
 rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf 2>/dev/null || true
 
@@ -65,7 +27,7 @@ sed -i "s/^mirror_components=.*/mirror_components=\"${ACTIVE_COMPONENTS}\"/" .si
 
 echo "[INFO] Componentes activos para ${ACTIVE_DIST}: ${ACTIVE_COMPONENTS}"
 
-CMD=(
+BASE_CMD=(
   build-simple-cdd
   --conf .simple-cdd.active.conf
   --profiles "${ANARTZ_PROFILES}"
@@ -78,16 +40,62 @@ CMD=(
 )
 
 if [ -n "${ANARTZ_DEBIAN_MIRROR:-}" ]; then
-  CMD+=(--debian-mirror "${ANARTZ_DEBIAN_MIRROR}")
+  BASE_CMD+=(--debian-mirror "${ANARTZ_DEBIAN_MIRROR}")
 fi
 if [ -n "${ACTIVE_SECURITY_MIRROR:-}" ]; then
-  CMD+=(--security-mirror "${ACTIVE_SECURITY_MIRROR}")
+  BASE_CMD+=(--security-mirror "${ACTIVE_SECURITY_MIRROR}")
 fi
 
-echo "[INFO] Construyendo ISO instalable (NO live) de Anartz OS con dist=${ACTIVE_DIST}..."
-printf '[INFO] Comando: sudo'; printf ' %q' "${CMD[@]}"; printf '\n'
+echo "[INFO] Paso 1/2: mirror-only para Anartz OS con dist=${ACTIVE_DIST}..."
+printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --mirror-only; printf '\n'
+sudo "${BASE_CMD[@]}" --mirror-only
 
-sudo "${CMD[@]}"
+EXPECTED_INITRD="tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/cdrom/initrd.gz"
+if [ ! -f "${EXPECTED_INITRD}" ]; then
+  echo "[WARN] Falta initrd cdrom esperado: ${EXPECTED_INITRD}"
+  mkdir -p "$(dirname "${EXPECTED_INITRD}")"
+
+  CANDIDATES=(
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/initrd.gz"
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/initrd.gz"
+    "tmp/mirror/dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/initrd.gz"
+  )
+
+  RECOVERED=0
+  for local_candidate in "${CANDIDATES[@]}"; do
+    if [ -f "${local_candidate}" ]; then
+      cp -f "${local_candidate}" "${EXPECTED_INITRD}"
+      echo "[INFO] Initrd recuperado desde mirror local: ${local_candidate}"
+      RECOVERED=1
+      break
+    fi
+  done
+
+  if [ "${RECOVERED}" -eq 0 ]; then
+    URL_CANDIDATES=(
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/debian-installer/${ANARTZ_ARCH}/initrd.gz"
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/netboot/gtk/initrd.gz"
+      "${ANARTZ_DEBIAN_MIRROR}dists/${ACTIVE_DIST}/main/installer-${ANARTZ_ARCH}/current/images/hd-media/initrd.gz"
+    )
+    for remote_url in "${URL_CANDIDATES[@]}"; do
+      if curl -fsSL "${remote_url}" -o "${EXPECTED_INITRD}"; then
+        echo "[INFO] Initrd recuperado descargando: ${remote_url}"
+        RECOVERED=1
+        break
+      fi
+    done
+  fi
+
+  if [ "${RECOVERED}" -eq 0 ]; then
+    echo "[ERROR] No pude recuperar initrd para ${ACTIVE_DIST}."
+    echo "[ERROR] Revisa tmp/log/ y prueba cambiar ANARTZ_DIST en auto/config."
+    exit 1
+  fi
+fi
+
+echo "[INFO] Paso 2/2: build-only para generar ISO instalable de Anartz OS..."
+printf '[INFO] Comando: sudo'; printf ' %q' "${BASE_CMD[@]}" --build-only; printf '\n'
+sudo "${BASE_CMD[@]}" --build-only
 
 ISO_PATH="$(find . -maxdepth 4 -type f -name '*.iso' | head -n1 || true)"
 if [ -n "${ISO_PATH}" ]; then

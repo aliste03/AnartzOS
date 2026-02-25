@@ -181,3 +181,18 @@ Si el error persiste, fuerza limpieza de artefactos root antes de relanzar:
 sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf
 ./build-iso.sh
 ```
+
+
+## Recuperación automática de initrd (error `cp: cannot stat ... images/cdrom/initrd.gz`)
+
+Algunos mirrors/distros no exponen `images/cdrom/initrd.gz` directamente para `simple-cdd`/`debian-cd`.
+
+`build-iso.sh` ahora ejecuta en dos fases:
+1. `--mirror-only`
+2. `--build-only`
+
+Entre ambas, si falta `.../images/cdrom/initrd.gz`, intenta recuperarlo desde:
+- netboot local ya espejado, o
+- descarga directa desde rutas `netboot/` o `hd-media/` del mirror,
+
+y lo coloca en la ruta esperada por `debian-cd`.
