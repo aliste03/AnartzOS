@@ -95,11 +95,13 @@ Si aparece:
    E: No packages found
    ... installer-amd64 ... initrd.gz ... No such file or directory
 
-El script ya intenta fallback automático a bullseye.
+La configuración actual usa `bullseye` por defecto para máxima compatibilidad en Kali (y deja fallback configurable).
 Si quieres forzarlo tú:
 
    nano auto/config
-   # cambiar a: export ANARTZ_DIST="bullseye"
+   # revisar distros:
+   # export ANARTZ_DIST="bullseye"
+   # export ANARTZ_FALLBACK_DIST="bookworm"
 
 Y relanza:
 

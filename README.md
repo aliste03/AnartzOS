@@ -133,7 +133,7 @@ Se corrigió la configuración para usar mirrors con **HTTPS** y barra final (`/
 
 Además `build-iso.sh` ahora:
 - valida mirrors al inicio;
-- fija `--profiles-udeb-dist bookworm`;
+- fija `--profiles-udeb-dist` con la distro activa;
 - imprime el comando exacto antes de ejecutar.
 
 Si te vuelve a pasar, limpia y relanza:
@@ -151,10 +151,13 @@ En algunos Kali/simple-cdd, `bookworm` falla con:
 - `E: No packages found`
 - `... installer-amd64 ... initrd.gz: No such file or directory`
 
-Para evitarlo, `build-iso.sh` ahora verifica si existe `installer-amd64/current/images/cdrom/initrd.gz` para la distro activa y, si no existe, aplica **fallback automático a bullseye**.
+Para evitarlo, `build-iso.sh` ahora verifica si existe `installer-amd64/current/images/cdrom/initrd.gz` para la distro activa y, si no existe, aplica fallback a la distro definida en `ANARTZ_FALLBACK_DIST`.
+
+Actualmente la configuración por defecto arranca en `bullseye` (más compatible en Kali) y deja `bookworm` como fallback.
 
 Puedes forzarlo manualmente editando `auto/config`:
 
 ```bash
 export ANARTZ_DIST="bullseye"
+export ANARTZ_FALLBACK_DIST="bookworm"
 ```

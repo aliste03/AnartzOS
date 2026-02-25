@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export ANARTZ_DIST="bookworm"
-export ANARTZ_FALLBACK_DIST="bullseye"
+export ANARTZ_DIST="bullseye"
+export ANARTZ_FALLBACK_DIST="bookworm"
 export ANARTZ_ARCH="amd64"
 
 export ANARTZ_DEBIAN_MIRROR="https://deb.debian.org/debian/"
