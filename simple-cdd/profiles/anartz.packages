@@ -1,0 +1,45 @@
+# Desktop
+kde-standard
+konsole
+plasma-nm
+network-manager
+sudo
+curl
+wget
+git
+vim
+htop
+btop
+neofetch
+
+# Web / server
+apache2
+nginx
+php-fpm
+php-cli
+mariadb-server
+postgresql
+redis-server
+ufw
+fail2ban
+docker.io
+docker-compose
+openssh-server
+
+# Gaming / Nvidia
+steam-installer
+lutris
+mangohud
+gamemode
+wine
+winetricks
+openjdk-17-jre
+prismlauncher
+nvidia-driver
+nvidia-settings
+firmware-misc-nonfree
+
+# Visual and boot
+plymouth
+plymouth-themes
+fonts-firacode

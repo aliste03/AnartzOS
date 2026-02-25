@@ -1,0 +1,51 @@
+# Anartz OS installable ISO profile (Debian Installer)
+
+d-i debian-installer/locale string es_ES.UTF-8
+d-i keyboard-configuration/xkb-keymap select es
+d-i netcfg/get_hostname string anartz-os
+d-i netcfg/get_domain string local
+
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+d-i passwd/root-login boolean true
+d-i passwd/make-user boolean true
+d-i passwd/user-fullname string Anartz
+d-i passwd/username string anartz
+
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/Madrid
+d-i clock-setup/ntp boolean true
+
+d-i partman-auto/method string regular
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-auto/choose_recipe select atomic
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm_write_new_label boolean true
+
+tasksel tasksel/first multiselect standard, kde-desktop
+d-i pkgsel/include string apache2 nginx php-fpm php-cli mariadb-server postgresql redis-server ufw fail2ban docker.io docker-compose openssh-server steam-installer lutris mangohud gamemode wine winetricks openjdk-17-jre prismlauncher nvidia-driver nvidia-settings firmware-misc-nonfree plymouth plymouth-themes fonts-firacode
+
+d-i preseed/late_command string \
+    in-target /bin/bash -c "set -e; \
+    WMSG='Bienvenido a Anartz os, desde aqui podras modificar el sistema y realizar cualquier accion mediante comandos, disfruta.'; \
+    for f in /etc/os-release /usr/lib/os-release; do [ -f \"$f\" ] && sed -i 's/Debian GNU\\/Linux/Anartz OS/g; s/Debian/Anartz OS/g; s/^NAME=.*/NAME=\"Anartz OS\"/; s/^PRETTY_NAME=.*/PRETTY_NAME=\"Anartz OS\"/' \"$f\" || true; done; \
+    echo 'Anartz OS' > /etc/hostname; \
+    echo \"$WMSG\" > /etc/motd; echo \"$WMSG\" > /etc/issue; echo \"$WMSG\" > /etc/issue.net; \
+    if grep -q '^root:x:0:0:' /etc/passwd; then sed -i 's/^root:x:0:0:/Anartz:x:0:0:/' /etc/passwd; fi; \
+    if grep -q '^root:' /etc/shadow; then sed -i 's/^root:/Anartz:/' /etc/shadow; fi; \
+    if grep -q '^root:x:0:' /etc/group; then sed -i 's/^root:x:0:/Anartz:x:0:/' /etc/group; fi; \
+    mkdir -p /etc/skel/.config /usr/share/plymouth/themes/anartz /usr/share/keyrings; \
+    cat > /etc/skel/.bashrc <<'BASHRC'\ncase \$- in *i*) ;; *) return;; esac\nHACK_BLUE='\\\\[\\\\e[38;5;39m\\\\]'\nDARK_BLUE='\\\\[\\\\e[38;5;25m\\\\]'\nWHITE='\\\\[\\\\e[97m\\\\]'\nRESET='\\\\[\\\\e[0m\\\\]'\nPS1=\"\${DARK_BLUE}[\${HACK_BLUE}\\u\${DARK_BLUE}@\${WHITE}AnartzOS\${DARK_BLUE}]\${HACK_BLUE}\\w\${WHITE}\\$ \${RESET}\"\nclear\nprintf '\\\\e[38;5;39m'\necho '╔════════════════════════════════════════════════════════════════╗'\necho '║                     WELCOME TO ANARTZ OS                      ║'\necho '╚════════════════════════════════════════════════════════════════╝'\nprintf '\\\\e[97m'\necho 'Bienvenido a Anartz os, desde aqui podras modificar el sistema y realizar cualquier accion mediante comandos, disfruta.'\nprintf '\\\\e[0m'\nBASHRC\n    cp /etc/skel/.bashrc /root/.bashrc; \
+    cat > /etc/skel/.config/kdeglobals <<'KDE'\n[General]\nColorScheme=BreezeDark\n[KDE]\nwidgetStyle=Breeze\n[WM]\nactiveBackground=0,24,48\nactiveForeground=255,255,255\ninactiveBackground=0,0,0\ninactiveForeground=200,200,200\nKDE\n    if [ -f /etc/default/grub ]; then sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR=\"Anartz OS\"/' /etc/default/grub; update-grub || true; fi; \
+    cat > /usr/share/plymouth/themes/anartz/anartz.plymouth <<'PLY'\n[Plymouth Theme]\nName=Anartz OS Glow\nDescription=Anartz OS boot splash with moving glow\nModuleName=script\n[script]\nImageDir=/usr/share/plymouth/themes/anartz\nScriptFile=/usr/share/plymouth/themes/anartz/anartz.script\nPLY\n    cat > /usr/share/plymouth/themes/anartz/anartz.script <<'SCR'\nWindow.SetBackgroundTopColor (0.0, 0.02, 0.12);\nWindow.SetBackgroundBottomColor (0.0, 0.0, 0.0);\nlogo = Image.Text('Anartz OS', 1, 1, 1);\nlabel = Sprite(logo);\nlabel.SetX(Window.GetWidth()/2 - logo.GetWidth()/2);\nlabel.SetY(Window.GetHeight()/2 - logo.GetHeight()/2);\nbar = Sprite();\nbar.SetY(label.GetY() + 4);\nstep = 0;\nfun refresh_callback ()\n  step += 6;\n  x = (step % (Window.GetWidth()+240)) - 120;\n  bar.SetX(x);\n  bar.SetOpacity(0.20);\nend\nPlymouth.SetRefreshFunction(refresh_callback);\nSCR\n    if command -v plymouth-set-default-theme >/dev/null 2>&1; then plymouth-set-default-theme -R anartz; fi; \
+    curl -fsSL https://deb.opera.com/archive.key | gpg --dearmor -o /usr/share/keyrings/opera.gpg || true; \
+    echo 'deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-stable/ stable non-free' > /etc/apt/sources.list.d/opera-stable.list; \
+    apt-get update || true; apt-get install -y opera-stable || true"
+
+d-i finish-install/reboot_in_progress note

@@ -1,0 +1,51 @@
+ANARTZ OS - COMO SACAR LA ISO INSTALABLE (NO LIVE)
+===================================================
+
+1) Instala dependencias en Debian/Ubuntu:
+
+   sudo apt update
+   sudo apt install -y simple-cdd debootstrap xorriso squashfs-tools curl gnupg ca-certificates
+
+2) Entra al repositorio:
+
+   cd /workspace/AnartzOS
+
+3) Lanza la construcción de la ISO instalable:
+
+   chmod +x build-iso.sh
+   ./build-iso.sh
+
+4) Espera a que termine (puede tardar bastante según red/CPU/disco).
+
+5) La ISO final quedará como:
+
+   anartz-os-installable.iso
+
+6) (Opcional) Comprueba que existe:
+
+   ls -lh anartz-os-installable.iso
+
+PRUEBA SIN INSTALAR EN TU PC (DESDE TERMINAL CON ENTORNO GRAFICO)
+=================================================================
+
+A) Instala QEMU:
+
+   sudo apt install -y qemu-system-x86
+
+B) Abre la ISO en una VM de prueba:
+
+   chmod +x run-iso-test.sh
+   ./run-iso-test.sh anartz-os-installable.iso
+
+C) Qué revisar:
+
+   - Debe arrancar instalador Debian (NO live)
+   - Debe verse branding "Anartz OS"
+   - Puedes recorrer el instalador sin tocar tu disco real
+   - Si quieres instalar para probar, hazlo en disco virtual de la VM
+
+Notas:
+- Si falla la build, limpia artefactos y vuelve a ejecutar:
+
+   rm -rf simple-cdd/tmp simple-cdd/images simple-cdd/log
+   ./build-iso.sh
