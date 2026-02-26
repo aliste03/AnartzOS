@@ -147,3 +147,12 @@ Si aparece error por `NONFREE_COMPONENTS` no inicializada o por falta de:
 esta versión ya lo corrige automáticamente al relanzar:
 
    sudo ./build-iso.sh
+
+
+ARREGLO RAPIDO SI YA INSTALASTE Y NO SALE ANARTZ OS
+===================================================
+
+En el sistema instalado ejecuta:
+
+   sudo ./fix-installed-anartz.sh
+   reboot

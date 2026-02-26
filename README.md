@@ -207,3 +207,15 @@ En algunos entornos, `debian-cd` requiere `NONFREE_COMPONENTS` y también ficher
 El script ahora:
 - ejecuta `build-simple-cdd` con `NONFREE_COMPONENTS` acorde a la distro activa;
 - recupera también `images/cdrom/gtk/initrd.gz` y `images/cdrom/gtk/vmlinuz` en la fase de parcheo.
+
+
+## Si ya instalaste y no salió el branding Anartz OS
+
+Ejecuta el script de corrección en el sistema instalado:
+
+```bash
+sudo ./fix-installed-anartz.sh
+reboot
+```
+
+Esto aplica hostname, `/etc/os-release`, `motd/issue`, prompt y GRUB con marca `Anartz OS`.
