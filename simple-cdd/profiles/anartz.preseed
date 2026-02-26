@@ -5,6 +5,15 @@ d-i keyboard-configuration/xkb-keymap select es
 d-i netcfg/get_hostname string anartz-os
 d-i netcfg/get_domain string local
 
+d-i debian-installer/gui boolean true
+d-i anna/choose_modules string gtk-initrd
+d-i cdebconf/frontend select gtk
+d-i cdebconf/newt/ansicolor boolean true
+d-i cdebconf/newt/title string Anartz OS
+d-i cdebconf-newt-udeb/title string Anartz OS
+d-i cdebconf/newt/text-color string white
+d-i cdebconf/newt/background-color string black
+
 d-i mirror/country string manual
 d-i mirror/http/hostname string deb.debian.org
 d-i mirror/http/directory string /debian

@@ -224,3 +224,12 @@ Esto aplica hostname, `/etc/os-release`, `motd/issue`, prompt y GRUB con marca `
 ## Entorno gráfico garantizado (KDE)
 
 La instalación ahora fuerza paquetes de escritorio (`kde-plasma-desktop`, `xorg`, `sddm`) y deja el sistema en `graphical.target` con `sddm` habilitado, para que arranque en interfaz gráfica (ideal para Minecraft/CurseForge).
+
+
+## Instalador gráfico estilo Anartz OS
+
+El preseed ahora fuerza frontend gráfico (`gtk`) y añade parámetros de título/colores para instalador:
+- título: `Anartz OS`
+- estilo solicitado: fondo oscuro y texto blanco.
+
+> Nota: Debian Installer puede ignorar parte del theming según hardware/controlador gráfico; pero con esta configuración intenta usar instalador gráfico GTK y branding Anartz OS arriba.

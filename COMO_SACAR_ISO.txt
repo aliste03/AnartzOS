@@ -167,3 +167,10 @@ Si ya instalaste sin entorno gráfico:
 
    sudo ./fix-installed-anartz.sh
    reboot
+
+
+INSTALADOR GRAFICO ANARTZ OS
+============================
+
+Se fuerza instalador gráfico GTK y título Anartz OS.
+Si en una máquina concreta no aplica todos los colores, suele ser limitación del instalador Debian con ese driver de vídeo.
