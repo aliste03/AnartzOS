@@ -204,3 +204,15 @@ COMPATIBILIDAD CON SIMPLE-CDD EN KALI
 =====================================
 
 Si tu versión de `build-simple-cdd` no soporta `--graphical-installer`, no pasa nada: el instalador gráfico se fuerza por preseed (GTK).
+
+
+RUN-ISO-TEST Y ARRANQUE DEL INSTALADOR
+=====================================
+
+Sí, puede influir si no arrancas realmente desde la ISO.
+
+Ahora `run-iso-test.sh` crea disco temporal y fuerza arranque desde CD (`order=d`).
+
+Ejecuta:
+
+   ./run-iso-test.sh anartz-os-installable.iso

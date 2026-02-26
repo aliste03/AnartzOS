@@ -266,3 +266,15 @@ tail -f tmp/log/anartz-mirror-only.log
 Algunas versiones de `build-simple-cdd` no soportan `--graphical-installer` (como en Kali).
 
 Por compatibilidad, el repo fuerza instalador gráfico desde preseed (`debian-installer/gui`, `cdebconf/frontend=gtk`) en lugar de usar ese flag.
+
+
+## Sobre run-iso-test.sh y el instalador
+
+Sí, podía influir si no quedaba forzado el arranque desde ISO o no había disco virtual limpio para instalar.
+
+Ahora `run-iso-test.sh`:
+- crea un disco QCOW2 temporal;
+- fuerza `-boot order=d,menu=on`;
+- borra el disco temporal al salir.
+
+Así siempre pruebas el instalador desde cero y evitas confusiones con arranques previos.
