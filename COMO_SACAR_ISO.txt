@@ -180,3 +180,15 @@ NOTA SOBRE WARNING USR-IS-MERGED
 ================================
 
 Si antes veías el warning de `usr-is-merged`, ahora se filtra automáticamente porque es opcional y no impide construir la ISO.
+
+
+SI PARECE BLOQUEADO EN MIRROR-ONLY
+==================================
+
+No está colgado: puede tardar. Ahora deja log en vivo en:
+
+   tmp/log/anartz-mirror-only.log
+
+Para verlo:
+
+   tail -f tmp/log/anartz-mirror-only.log

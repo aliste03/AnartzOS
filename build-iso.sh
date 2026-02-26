@@ -50,10 +50,36 @@ fi
 
 run_simple_cdd() {
   local mode="$1"
+  local step
+  step="${mode#--}"
+  local logfile="tmp/log/anartz-${step}.log"
+
+  mkdir -p tmp/log
+
   echo "[INFO] Comando: sudo env NONFREE_COMPONENTS=${ACTIVE_NONFREE_COMPONENTS}"
   printf '[INFO] build-simple-cdd'; printf ' %q' "${BASE_CMD[@]:1}" "${mode}"; printf '\n'
+  echo "[INFO] Log en vivo: ${logfile}"
+
+  set +e
   sudo env NONFREE_COMPONENTS="${ACTIVE_NONFREE_COMPONENTS}" "${BASE_CMD[@]}" "${mode}" \
-    2> >(grep -v "missing optional packages from profile default: usr-is-merged" >&2)
+    > >(tee -a "${logfile}") \
+    2> >(grep -v "missing optional packages from profile default: usr-is-merged" | tee -a "${logfile}" >&2) &
+  local cmd_pid=$!
+
+  while kill -0 "${cmd_pid}" >/dev/null 2>&1; do
+    sleep 30
+    echo "[INFO] (${step}) sigue en ejecución... puedes ver progreso con: tail -f ${logfile}"
+  done
+
+  wait "${cmd_pid}"
+  local rc=$?
+  set -e
+
+  if [ "${rc}" -ne 0 ]; then
+    echo "[ERROR] build-simple-cdd ${mode} falló con código ${rc}."
+    echo "[ERROR] Revisa log: ${logfile}"
+    exit "${rc}"
+  fi
 }
 
 echo "[INFO] Paso 1/2: mirror-only para Anartz OS con dist=${ACTIVE_DIST}..."

@@ -241,3 +241,18 @@ En builds con bullseye, simple-cdd puede emitir el warning opcional:
 `missing optional packages from profile default: usr-is-merged`.
 
 El script ahora filtra esa línea concreta para que no ensucie la salida, ya que no bloquea la generación de la ISO.
+
+
+## Si parece que la build está "bloqueada"
+
+`--mirror-only` puede tardar bastante tiempo sin mucho output en algunas redes.
+
+Ahora el script muestra heartbeat cada 30s y escribe log en:
+- `tmp/log/anartz-mirror-only.log`
+- `tmp/log/anartz-build-only.log`
+
+Puedes seguirlo en vivo con:
+
+```bash
+tail -f tmp/log/anartz-mirror-only.log
+```
