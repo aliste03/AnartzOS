@@ -174,3 +174,9 @@ INSTALADOR GRAFICO ANARTZ OS
 
 Se fuerza instalador gráfico GTK y título Anartz OS.
 Si en una máquina concreta no aplica todos los colores, suele ser limitación del instalador Debian con ese driver de vídeo.
+
+
+NOTA SOBRE WARNING USR-IS-MERGED
+================================
+
+Si antes veías el warning de `usr-is-merged`, ahora se filtra automáticamente porque es opcional y no impide construir la ISO.

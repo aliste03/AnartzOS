@@ -233,3 +233,11 @@ El preseed ahora fuerza frontend gráfico (`gtk`) y añade parámetros de títul
 - estilo solicitado: fondo oscuro y texto blanco.
 
 > Nota: Debian Installer puede ignorar parte del theming según hardware/controlador gráfico; pero con esta configuración intenta usar instalador gráfico GTK y branding Anartz OS arriba.
+
+
+## Nota sobre warning `usr-is-merged`
+
+En builds con bullseye, simple-cdd puede emitir el warning opcional:
+`missing optional packages from profile default: usr-is-merged`.
+
+El script ahora filtra esa línea concreta para que no ensucie la salida, ya que no bloquea la generación de la ISO.
