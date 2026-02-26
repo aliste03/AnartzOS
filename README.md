@@ -218,4 +218,9 @@ sudo ./fix-installed-anartz.sh
 reboot
 ```
 
-Esto aplica hostname, `/etc/os-release`, `motd/issue`, prompt y GRUB con marca `Anartz OS`.
+Esto aplica hostname, `/etc/os-release`, `motd/issue`, prompt y GRUB con marca `Anartz OS`, y además instala/habilita KDE+SDDM si faltan.
+
+
+## Entorno gráfico garantizado (KDE)
+
+La instalación ahora fuerza paquetes de escritorio (`kde-plasma-desktop`, `xorg`, `sddm`) y deja el sistema en `graphical.target` con `sddm` habilitado, para que arranque en interfaz gráfica (ideal para Minecraft/CurseForge).

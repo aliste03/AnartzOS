@@ -156,3 +156,14 @@ En el sistema instalado ejecuta:
 
    sudo ./fix-installed-anartz.sh
    reboot
+
+
+ENTORNO GRAFICO PARA JUGAR (MINECRAFT / CURSEFORGE)
+====================================================
+
+La instalación ahora incluye KDE + SDDM + Xorg por defecto.
+
+Si ya instalaste sin entorno gráfico:
+
+   sudo ./fix-installed-anartz.sh
+   reboot

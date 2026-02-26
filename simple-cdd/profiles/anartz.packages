@@ -1,4 +1,9 @@
 # Desktop
+mesa-vulkan-drivers
+xserver-xorg-video-all
+xorg
+sddm
+kde-plasma-desktop
 kde-standard
 konsole
 plasma-nm
