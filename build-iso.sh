@@ -92,6 +92,40 @@ EXPECTED_GTK_DIR="${EXPECTED_DIR}/gtk"
 EXPECTED_GTK_INITRD="${EXPECTED_GTK_DIR}/initrd.gz"
 EXPECTED_GTK_KERNEL="${EXPECTED_GTK_DIR}/vmlinuz"
 
+
+patch_initrd_branding() {
+  local initrd_path="$1"
+  [ -f "${initrd_path}" ] || return 0
+
+  local workdir
+  workdir="$(mktemp -d)"
+
+  if (cd "${workdir}" && gzip -dc "${initrd_path}" | cpio -id --quiet) >/dev/null 2>&1; then
+    local changed=0
+    # Cambiar textos Debian -> Anartz OS en archivos de texto del initrd del instalador.
+    while IFS= read -r -d '' file; do
+      if file --mime "${file}" 2>/dev/null | grep -q 'charset=binary'; then
+        continue
+      fi
+      if rg -q "Debian" "${file}"; then
+        sed -i 's/Debian/Anartz OS/g' "${file}" || true
+        changed=1
+      fi
+      if rg -q "debian" "${file}"; then
+        sed -i 's/debian/AnartzOS/g' "${file}" || true
+        changed=1
+      fi
+    done < <(find "${workdir}" -type f -print0)
+
+    if [ "${changed}" -eq 1 ]; then
+      (cd "${workdir}" && find . -print0 | cpio --null -o -H newc --quiet | gzip -9 > "${initrd_path}")
+      echo "[INFO] Branding textual aplicado en initrd: ${initrd_path}"
+    fi
+  fi
+
+  rm -rf "${workdir}"
+}
+
 recover_file() {
   local target_path="$1"
   local filename="$2"
@@ -159,6 +193,9 @@ recover_file "${EXPECTED_KERNEL}" "vmlinuz"
 recover_file "${EXPECTED_GTK_INITRD}" "initrd.gz"
 recover_file "${EXPECTED_GTK_KERNEL}" "vmlinuz"
 recover_file "${EXPECTED_DIR}/debian-cd_info.tar.gz" "debian-cd_info.tar.gz" "1"
+
+patch_initrd_branding "${EXPECTED_INITRD}"
+patch_initrd_branding "${EXPECTED_GTK_INITRD}"
 
 echo "[INFO] Paso 2/2: build-only para generar ISO instalable de Anartz OS..."
 run_simple_cdd --build-only

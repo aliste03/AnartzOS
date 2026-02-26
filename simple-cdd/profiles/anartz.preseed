@@ -13,6 +13,9 @@ d-i cdebconf/newt/title string Anartz OS
 d-i cdebconf-newt-udeb/title string Anartz OS
 d-i cdebconf/newt/text-color string white
 d-i cdebconf/newt/background-color string black
+d-i debian-installer/title string Anartz OS
+d-i cdebconf/title string Anartz OS
+d-i cdebconf-gtk/title string Anartz OS
 
 d-i mirror/country string manual
 d-i mirror/http/hostname string deb.debian.org

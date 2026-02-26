@@ -235,6 +235,9 @@ El preseed ahora fuerza frontend gráfico (`gtk`) y añade parámetros de títul
 > Nota: Debian Installer puede ignorar parte del theming según hardware/controlador gráfico; pero con esta configuración intenta usar instalador gráfico GTK y branding Anartz OS arriba.
 
 
+Además del preseed GTK, la build ahora parchea texto dentro del `initrd` del instalador (`Debian` -> `Anartz OS`) para reforzar branding durante la instalación.
+
+
 ## Nota sobre warning `usr-is-merged`
 
 En builds con bullseye, simple-cdd puede emitir el warning opcional:

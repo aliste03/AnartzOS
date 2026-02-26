@@ -192,3 +192,9 @@ No está colgado: puede tardar. Ahora deja log en vivo en:
 Para verlo:
 
    tail -f tmp/log/anartz-mirror-only.log
+
+
+NOTA BRANDING INSTALADOR
+========================
+
+La build también parchea textos del initrd del instalador para cambiar "Debian" por "Anartz OS" donde sea posible.
