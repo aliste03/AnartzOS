@@ -38,7 +38,6 @@ BASE_CMD=(
   --keyboard es
   --auto-profiles "${ANARTZ_PROFILES}"
   --profiles-udeb-dist "${ACTIVE_DIST}"
-  --graphical-installer
   --force-root
 )
 

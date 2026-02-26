@@ -261,6 +261,8 @@ tail -f tmp/log/anartz-mirror-only.log
 ```
 
 
-## Instalador gráfico por flag de simple-cdd
+## Instalador gráfico (compatibilidad por versión)
 
-El build invoca explícitamente `build-simple-cdd --graphical-installer` para forzar que el instalador gráfico sea el predeterminado.
+Algunas versiones de `build-simple-cdd` no soportan `--graphical-installer` (como en Kali).
+
+Por compatibilidad, el repo fuerza instalador gráfico desde preseed (`debian-installer/gui`, `cdebconf/frontend=gtk`) en lugar de usar ese flag.

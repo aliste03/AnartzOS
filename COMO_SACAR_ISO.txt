@@ -200,7 +200,7 @@ NOTA BRANDING INSTALADOR
 La build también parchea textos del initrd del instalador para cambiar "Debian" por "Anartz OS" donde sea posible.
 
 
-GRAPHICAL-INSTALLER ACTIVADO
-============================
+COMPATIBILIDAD CON SIMPLE-CDD EN KALI
+=====================================
 
-El script de build ya llama a simple-cdd con `--graphical-installer` para arrancar instalador gráfico por defecto.
+Si tu versión de `build-simple-cdd` no soporta `--graphical-installer`, no pasa nada: el instalador gráfico se fuerza por preseed (GTK).
