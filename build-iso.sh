@@ -51,7 +51,7 @@ fi
 run_simple_cdd() {
   local mode="$1"
   echo "[INFO] Comando: sudo env NONFREE_COMPONENTS=${ACTIVE_NONFREE_COMPONENTS}"
-  printf '[INFO] build-simple-cdd'; printf ' %q' "${BASE_CMD[@]:1}" "${mode}"; printf '\\n'
+  printf '[INFO] build-simple-cdd'; printf ' %q' "${BASE_CMD[@]:1}" "${mode}"; printf '\n'
   sudo env NONFREE_COMPONENTS="${ACTIVE_NONFREE_COMPONENTS}" "${BASE_CMD[@]}" "${mode}"
 }
 
