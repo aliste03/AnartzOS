@@ -259,3 +259,8 @@ Puedes seguirlo en vivo con:
 ```bash
 tail -f tmp/log/anartz-mirror-only.log
 ```
+
+
+## Instalador gráfico por flag de simple-cdd
+
+El build invoca explícitamente `build-simple-cdd --graphical-installer` para forzar que el instalador gráfico sea el predeterminado.

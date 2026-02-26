@@ -198,3 +198,9 @@ NOTA BRANDING INSTALADOR
 ========================
 
 La build también parchea textos del initrd del instalador para cambiar "Debian" por "Anartz OS" donde sea posible.
+
+
+GRAPHICAL-INSTALLER ACTIVADO
+============================
+
+El script de build ya llama a simple-cdd con `--graphical-installer` para arrancar instalador gráfico por defecto.
