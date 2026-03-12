@@ -1,0 +1,206 @@
+ANARTZ OS - COMO SACAR LA ISO INSTALABLE (NO LIVE)
+===================================================
+
+1) Instala dependencias en Debian/Ubuntu:
+
+   sudo apt update
+   sudo apt install -y simple-cdd debootstrap xorriso squashfs-tools curl gnupg ca-certificates
+
+2) Entra al repositorio:
+
+   cd /workspace/AnartzOS
+
+3) Lanza la construcción de la ISO instalable:
+
+   chmod +x build-iso.sh
+   ./build-iso.sh
+
+4) Espera a que termine (puede tardar bastante según red/CPU/disco).
+
+5) La ISO final quedará como:
+
+   anartz-os-installable.iso
+
+6) (Opcional) Comprueba que existe:
+
+   ls -lh anartz-os-installable.iso
+
+PRUEBA SIN INSTALAR EN TU PC (DESDE TERMINAL CON ENTORNO GRAFICO)
+=================================================================
+
+A) Instala QEMU:
+
+   sudo apt install -y qemu-system-x86
+
+B) Abre la ISO en una VM de prueba:
+
+   chmod +x run-iso-test.sh
+   ./run-iso-test.sh anartz-os-installable.iso
+
+C) Qué revisar:
+
+   - Debe arrancar instalador Debian (NO live)
+   - Debe verse branding "Anartz OS"
+   - Puedes recorrer el instalador sin tocar tu disco real
+   - Si quieres instalar para probar, hazlo en disco virtual de la VM
+
+Notas:
+- Si falla la build, limpia artefactos y vuelve a ejecutar:
+
+   rm -rf simple-cdd/tmp simple-cdd/images simple-cdd/log
+   ./build-iso.sh
+
+
+ERROR COMUN EN KALI
+===================
+
+Si aparece:
+
+   build-simple-cdd: error: ambiguous option: --mirror
+
+ya está corregido en este repo cambiando a `--debian-mirror`.
+Simplemente vuelve a ejecutar:
+
+   ./build-iso.sh
+
+
+COMPROBACION RAPIDA SI EL ERROR CONTINUA
+========================================
+
+Ejecuta:
+
+   pwd
+   head -n 40 ./build-iso.sh
+   grep -n -- "--mirror" ./build-iso.sh || echo "OK: sin --mirror"
+
+Si sale `--mirror`, estás usando una copia antigua del script.
+
+
+ERROR: NO PACKAGES FOUND / MIRROR SIN '/'
+=========================================
+
+Ya está corregido con mirrors HTTPS y barra final.
+
+Si falla de nuevo:
+
+   rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log
+   ./build-iso.sh
+
+
+FALLO NO PACKAGES FOUND EN KALI
+===============================
+
+Si aparece:
+
+   E: No packages found
+   ... installer-amd64 ... initrd.gz ... No such file or directory
+
+La configuración actual usa `bullseye` por defecto para máxima compatibilidad en Kali (y deja fallback configurable).
+Si quieres forzarlo tú:
+
+   nano auto/config
+   # revisar distros:
+   # export ANARTZ_DIST="bullseye"
+   # export ANARTZ_FALLBACK_DIST="bookworm"
+
+Y relanza:
+
+   ./build-iso.sh
+
+
+ERROR REPREPRO UNDEFINEDTARGET
+==============================
+
+Si sale error de `undefinedtarget`, era por componentes incompatibles (ej. `non-free-firmware` en bullseye).
+
+Ya está corregido: `build-iso.sh` ajusta componentes según distro y crea `.simple-cdd.active.conf` automáticamente.
+
+
+Si sigue fallando, limpia como root (muy importante):
+
+   sudo rm -rf tmp images simple-cdd/tmp simple-cdd/images simple-cdd/log .simple-cdd.active.conf
+   ./build-iso.sh
+
+
+ERROR INITRD CDROM NO ENCONTRADO
+================================
+
+Si aparece:
+
+   cp: cannot stat '.../images/cdrom/initrd.gz'
+   cp: cannot stat '.../images/cdrom/vmlinuz'
+   cp: cannot stat '.../images/cdrom/debian-cd_info.tar.gz'
+
+Ahora el script intenta recuperarlos automáticamente (mirror-only -> parche initrd/vmlinuz/debian-cd_info -> build-only).
+Solo vuelve a lanzar:
+
+   ./build-iso.sh
+
+
+ERROR GTK VMLINUZ / NONFREE_COMPONENTS
+======================================
+
+Si aparece error por `NONFREE_COMPONENTS` no inicializada o por falta de:
+
+   .../images/cdrom/gtk/vmlinuz
+
+esta versión ya lo corrige automáticamente al relanzar:
+
+   sudo ./build-iso.sh
+
+
+ARREGLO RAPIDO SI YA INSTALASTE Y NO SALE ANARTZ OS
+===================================================
+
+En el sistema instalado ejecuta:
+
+   sudo ./fix-installed-anartz.sh
+   reboot
+
+
+ENTORNO GRAFICO PARA JUGAR (MINECRAFT / CURSEFORGE)
+====================================================
+
+La instalación ahora incluye KDE + SDDM + Xorg por defecto.
+
+Si ya instalaste sin entorno gráfico:
+
+   sudo ./fix-installed-anartz.sh
+   reboot
+
+
+INSTALADOR GRAFICO ANARTZ OS
+============================
+
+Se fuerza instalador gráfico GTK y título Anartz OS.
+Si en una máquina concreta no aplica todos los colores, suele ser limitación del instalador Debian con ese driver de vídeo.
+
+
+NOTA SOBRE WARNING USR-IS-MERGED
+================================
+
+Si antes veías el warning de `usr-is-merged`, ahora se filtra automáticamente porque es opcional y no impide construir la ISO.
+
+
+SI PARECE BLOQUEADO EN MIRROR-ONLY
+==================================
+
+No está colgado: puede tardar. Ahora deja log en vivo en:
+
+   tmp/log/anartz-mirror-only.log
+
+Para verlo:
+
+   tail -f tmp/log/anartz-mirror-only.log
+
+
+NOTA BRANDING INSTALADOR
+========================
+
+La build también parchea textos del initrd del instalador para cambiar "Debian" por "Anartz OS" donde sea posible.
+
+
+GRAPHICAL-INSTALLER ACTIVADO
+============================
+
+El script de build ya llama a simple-cdd con `--graphical-installer` para arrancar instalador gráfico por defecto.

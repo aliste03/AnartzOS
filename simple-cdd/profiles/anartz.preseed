@@ -1,0 +1,66 @@
+# Anartz OS installable ISO profile (Debian Installer)
+
+d-i debian-installer/locale string es_ES.UTF-8
+d-i keyboard-configuration/xkb-keymap select es
+d-i netcfg/get_hostname string anartz-os
+d-i netcfg/get_domain string local
+
+d-i debian-installer/gui boolean true
+d-i anna/choose_modules string gtk-initrd
+d-i cdebconf/frontend select gtk
+d-i cdebconf/newt/ansicolor boolean true
+d-i cdebconf/newt/title string Anartz OS
+d-i cdebconf-newt-udeb/title string Anartz OS
+d-i cdebconf/newt/text-color string white
+d-i cdebconf/newt/background-color string black
+d-i debian-installer/title string Anartz OS
+d-i cdebconf/title string Anartz OS
+d-i cdebconf-gtk/title string Anartz OS
+
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+d-i passwd/root-login boolean true
+d-i passwd/make-user boolean true
+d-i passwd/user-fullname string Anartz
+d-i passwd/username string anartz
+
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/Madrid
+d-i clock-setup/ntp boolean true
+
+d-i partman-auto/method string regular
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-auto/choose_recipe select atomic
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm_write_new_label boolean true
+
+tasksel tasksel/first multiselect standard, kde-desktop
+d-i pkgsel/include string usr-is-merged sudo bash curl wget git vim htop btop neofetch xorg xserver-xorg-video-all kde-plasma-desktop sddm plasma-desktop plasma-workspace mesa-vulkan-drivers apache2 nginx php-fpm php-cli mariadb-server postgresql redis-server ufw fail2ban docker.io docker-compose openssh-server steam-installer lutris mangohud gamemode wine winetricks openjdk-17-jre prismlauncher nvidia-driver nvidia-settings firmware-misc-nonfree plymouth plymouth-themes fonts-firacode
+
+d-i preseed/late_command string \
+  in-target /bin/sh -c "set -e; \
+  WMSG='Bienvenido a Anartz os, desde aqui podras modificar el sistema y realizar cualquier accion mediante comandos, disfruta.'; \
+  echo 'Anartz OS' > /etc/hostname; \
+  sed -i 's/^127.0.1.1.*/127.0.1.1\tAnartzOS/g' /etc/hosts || true; \
+  echo \"$WMSG\" > /etc/motd; echo \"$WMSG\" > /etc/issue; echo \"$WMSG\" > /etc/issue.net; \
+  for f in /etc/os-release /usr/lib/os-release; do [ -f \"$f\" ] && sed -i 's/Debian GNU\\/Linux/Anartz OS/g; s/^NAME=.*/NAME=\"Anartz OS\"/; s/^PRETTY_NAME=.*/PRETTY_NAME=\"Anartz OS\"/' \"$f\" || true; done; \
+  if [ -f /etc/default/grub ]; then sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR=\"Anartz OS\"/' /etc/default/grub || true; update-grub || true; fi; \
+  mkdir -p /etc/profile.d /etc/skel/.config /usr/share/plymouth/themes/anartz; \
+  printf '%s\n' 'HACK_BLUE="\\e[38;5;39m"' 'DARK_BLUE="\\e[38;5;25m"' 'WHITE="\\e[97m"' 'export PS1="\\[\\e[38;5;25m\\][\\[\\e[38;5;39m\\]\\u\\[\\e[38;5;25m\\]@\\[\\e[97m\\]AnartzOS\\[\\e[38;5;25m\\]]\\[\\e[38;5;39m\\]\\w\\[\\e[97m\\]\\$ \\[\\e[0m\\]"' > /etc/profile.d/anartz.sh; \
+  printf '%s\n' '[General]' 'ColorScheme=BreezeDark' '[KDE]' 'widgetStyle=Breeze' '[WM]' 'activeBackground=0,24,48' 'activeForeground=255,255,255' 'inactiveBackground=0,0,0' 'inactiveForeground=200,200,200' > /etc/skel/.config/kdeglobals; \
+  printf '%s\n' '[Plymouth Theme]' 'Name=Anartz OS Glow' 'Description=Anartz OS boot splash' 'ModuleName=script' '[script]' 'ImageDir=/usr/share/plymouth/themes/anartz' 'ScriptFile=/usr/share/plymouth/themes/anartz/anartz.script' > /usr/share/plymouth/themes/anartz/anartz.plymouth; \
+  printf '%s\n' 'Window.SetBackgroundTopColor (0.0, 0.02, 0.12);' 'Window.SetBackgroundBottomColor (0.0, 0.0, 0.0);' 'logo = Image.Text("Anartz OS", 1, 1, 1);' 'label = Sprite(logo);' 'label.SetX(Window.GetWidth()/2 - logo.GetWidth()/2);' 'label.SetY(Window.GetHeight()/2 - logo.GetHeight()/2);' > /usr/share/plymouth/themes/anartz/anartz.script; \
+  if command -v plymouth-set-default-theme >/dev/null 2>&1; then plymouth-set-default-theme -R anartz || true; fi; \
+  curl -fsSL https://deb.opera.com/archive.key | gpg --dearmor -o /usr/share/keyrings/opera.gpg || true; \
+  echo 'deb [signed-by=/usr/share/keyrings/opera.gpg] https://deb.opera.com/opera-stable/ stable non-free' > /etc/apt/sources.list.d/opera-stable.list; \
+  apt-get update || true; apt-get install -y opera-stable || true; \
+  systemctl set-default graphical.target || true; \
+  systemctl enable sddm || true"
+
+d-i finish-install/reboot_in_progress note

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export ANARTZ_DIST="bullseye"
+export ANARTZ_FALLBACK_DIST="bookworm"
+export ANARTZ_ARCH="amd64"
+
+export ANARTZ_DEBIAN_MIRROR="https://deb.debian.org/debian/"
+export ANARTZ_SECURITY_MIRROR="https://security.debian.org/debian-security/"
+export ANARTZ_FALLBACK_SECURITY_MIRROR="https://security.debian.org/debian-security/"
+
+export ANARTZ_PROFILES="anartz"
+export ANARTZ_ISO_NAME="anartz-os-installable.iso"
+
+echo "[INFO] Configuración Anartz OS cargada: dist=${ANARTZ_DIST}, arch=${ANARTZ_ARCH}, profile=${ANARTZ_PROFILES}"
